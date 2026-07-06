@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection System</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; }
+        h1 { color: #1a1a2e; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        input { padding: 6px; width: 100%; box-sizing: border-box; }
+        label { font-size: 12px; color: #555; }
+        button { padding: 12px 24px; background: #1a1a2e; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+        button:hover { background: #16213e; }
+        .result { margin-top: 25px; padding: 20px; border-radius: 8px; font-size: 18px; }
+        .fraud { background: #ffe0e0; color: #b00020; border: 2px solid #b00020; }
+        .legit { background: #e0ffe6; color: #0a7d2c; border: 2px solid #0a7d2c; }
+        .sample-btn { background: #555; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Credit Card Fraud Detection</h1>
+    <p>Enter transaction details (V1-V28 are PCA-anonymized features, Amount in $)</p>
+
+    <button type="button" class="sample-btn" onclick="loadFraudSample()">Load Sample Fraud Case</button>
+    <button type="button" class="sample-btn" onclick="loadLegitSample()">Load Sample Legit Case</button>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="grid">
+            {% for i in "123456789" %}
+                <div><label>V{{ i }}</label><input type="text" name="v{{ i }}" id="v{{ i }}" value="0"></div>
+            {% endfor %}
+        </div>
+        <div class="grid">
+            {% for i in "0123456789" %}
+                <div><label>V1{{ i }}</label><input type="text" name="v1{{ i }}" id="v1{{ i }}" value="0"></div>
+            {% endfor %}
+        </div>
+        <div class="grid">
+            {% for i in "0123456789" %}
+                <div><label>V2{{ i }}</label><input type="text" name="v2{{ i }}" id="v2{{ i }}" value="0"></div>
+            {% endfor %}
+        </div>
+        <br>
+        <label>Amount ($)</label>
+        <input type="text" name="amount" id="amount" value="100">
+        <br>
+        <button type="submit">Check Transaction</button>
+    </form>
+
+    {% if result %}
+        {% if result.error %}
+            <div class="result">Error: {{ result.error }}</div>
+        {% else %}
+            <div class="result {% if result.flag == 'FRAUD' %}fraud{% else %}legit{% endif %}">
+                <strong>{{ result.flag }}</strong> — Fraud Probability: {{ result.probability }}%
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <script>
+        function loadFraudSample() {
+            const values = [-2.3122, 1.9519, -1.6098, 3.9979, -0.5222, -1.4265, -2.5373, 1.3916, -2.7700, -2.7727, 3.2020, -2.8999, -0.5959, -4.2892, 0.3897, -1.1407, -2.8300, -0.0168, 0.4169, 0.1267, 0.5172, -0.0350, -0.4652, 0.3202, 0.0445, 0.1780, 0.2611, -0.1433];
+            for (let i = 0; i < 28; i++) document.getElementById('v' + (i+1)).value = values[i];
+            document.getElementById('amount').value = 0;
+        }
+        function loadLegitSample() {
+            for (let i = 1; i <= 28; i++) document.getElementById('v' + i).value = (Math.random() * 2 - 1).toFixed(4);
+            document.getElementById('amount').value = 50;
+        }
+    </script>
+</body>
+</html>
